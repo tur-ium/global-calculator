@@ -16,24 +16,24 @@ Installation
 
 This guide is adapted from Tom Counsell’s guide on the decc GitHub. You can find a more up to date fork of the project here.
 ## What you need
-    1. A computer with at least 4 GB and ideally 8 GB of memory 
-    2. Windows 10 or Linux
-    3. Internet access. You will need to download up to 3 Gb of files, though this can be reduced to less.
+1. A computer with at least 4 GB and ideally 8 GB of memory 
+2. Windows 10 or Linux
+3. Internet access. You will need to download up to 3 Gb of files, though this can be reduced to less.
 For Linux
-    4. Standard build tools (g++, etc) 
-    5. With version 2.1 2.5 of Ruby installed, including development headers 
+4. Standard build tools (g++, etc) 
+5. With version 2.1 2.5 of Ruby installed, including development headers 
+
 In the util folder is a bash script that we use to set up Ubuntu 14.04 20.04 to be capable of running the global calculator. This can give clues on how to get the system running.
+
 ## Windows 10 Instructions (Skip if you have Linux)
 ### Setup the Windows Subsystem for Linux (WSL)
-Refer to these instructions if you have issues (where these instructions are adapted from): https://docs.microsoft.com/en-us/windows/wsl/install-win10
-    1. Open PowerShell as an administrator by typing “PowerShell” into the search bar, and selecting “Run as administrator” (as in the screenshot below). If prompted, press confirm or enter an administrator password.
+_Refer to these instructions if you have issues (where these instructions are adapted from): https://docs.microsoft.com/en-us/windows/wsl/install-win10_
+1. Open PowerShell as an administrator by typing “PowerShell” into the search bar, and selecting “Run as administrator”. If prompted, press confirm or enter an administrator password.
+2. In the blue Powershell window copy and paste (or type) the following command, all as one line:
+   dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
+3. Restart your machine to complete the WSL install and update to WSL 2. 
+4. Open the Microsoft Store and select your favourite Linux distribution. This guide is designed for Ubuntu, but can be adapted to other flavours of Linux.
 
-    2. In the blue Powershell window copy and paste (or type) the following command, all as one line:
-       dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
-
-    3. Restart your machine to complete the WSL install and update to WSL 2. 
-    4. Open the Microsoft Store and select your favourite Linux distribution. This guide is designed for Ubuntu, but can be adapted to other flavours of Linux.
-       
 ## Installing Ruby and Bundle
 The following is adapted from these instructions for installing Ruby using RVM, tested on Ubuntu 20.04 LTS on Windows 10 WSL 1.0. Here we use Ruby 2.5, but if this doesn’t work try a newer version of Ruby.
     1. \curl -sSL https://get.rvm.io | bash
@@ -54,8 +54,9 @@ Run the following commands in Linux. To save time or if you have limited interne
 
 ## Starting the server
 
-    10. Go to the main global-calculator directory and run the following command rackup. Some lines of code will appear, and eventually something along the lines of WEBrick Server started … Port 9292
-    11.  Open a web browser, like Firefox and go to http://localhost:9292 . You should see the homepage of the global calculator – all running on your own computer!
+10. Go to the main global-calculator directory and run the following command rackup. Some lines of code will appear, and eventually something along the lines of WEBrick Server started … Port 9292
+11.  Open a web browser, like Firefox and go to http://localhost:9292 . You should see the homepage of the global calculator – all running on your own computer!
+
 ## Notes
 The bundle step should install all the dependencies. If it fails it may ask you to check a particular 'gem' installs manually. Doing that normally fixes the problem and the step can be repeated.
 The bundle exec Rake step compiles the C version of the model. This can take tens of minutes, and requires plenty of memory.
@@ -83,17 +84,6 @@ Note:
 1. that the C version only includes outputs that are given in named ranges starting with 'webtool'
 2. That translating a spreadsheet of this size needs at least 4 GB of RAM and can take 5 or 6 hours.
 
-Live deployment
----------------
-
-These are some notes on how we are deploying this live.
-
-1. We are using Amazon Route 53 to route requests to http://tool.globalcalculator.org to the CloudFront caching service
-2. The CloudFront caching service routes requests to an ElasticLoadBalancer
-3. The ElasticLoadBalancer routes requests to between two and twenty EC2 instances running Ubuntu 14.04
-4. The EC2 instances are running nginx. These:
-  a. Detects requests to the public/gc-anim folder and route these to another CloudFront caching service (see gc-anim below)
-  b. Otherwise routes requests using Passenger to versions of this code running on Ruby 2.2
 
 The gc-anim folder
 ------------------
