@@ -11,48 +11,73 @@ Canonical source: http://github.com/decc/global-calculator
 
 Please report issues and suggest patches there.
 
-Installing a local copy
------------------------
+Installation
+-----------
 
-What you need:
+This guide is adapted from Tom Counsell’s guide on the decc GitHub. You can find a more up to date fork of the project here.
+## What you need
+    1. A computer with at least 4 GB and ideally 8 GB of memory 
+    2. Windows 10 or Linux
+    3. Internet access. You will need to download up to 3 Gb of files, though this can be reduced to less.
+For Linux
+    4. Standard build tools (g++, etc) 
+    5. With version 2.1 2.5 of Ruby installed, including development headers 
+In the util folder is a bash script that we use to set up Ubuntu 14.04 20.04 to be capable of running the global calculator. This can give clues on how to get the system running.
+## Windows 10 Instructions (Skip if you have Linux)
+### Setup the Windows Subsystem for Linux (WSL)
+Refer to these instructions if you have issues (where these instructions are adapted from): https://docs.microsoft.com/en-us/windows/wsl/install-win10
+    1. Open PowerShell as an administrator by typing “PowerShell” into the search bar, and selecting “Run as administrator” (as in the screenshot below). If prompted, press confirm or enter an administrator password.
 
-1. A server with at least 4 GB and ideally 8 GB of memory
-2. Running a flavour of Unix
-3. With the standard build tools installed
-3. With version 2.1 of Ruby installed, including development headers
+    2. In the blue Powershell window copy and paste (or type) the following command, all as one line:
+       dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
 
-In the util folder is a bash script that we use to set up a Ubuntu 14.04 server to be capable of running the global calculator.
-This can give clues on how to get the system running. 
+    3. Restart your machine to complete the WSL install and update to WSL 2. 
+    4. Open the Microsoft Store and select your favourite Linux distribution. This guide is designed for Ubuntu, but can be adapted to other flavours of Linux.
+       
+## Installing Ruby and Bundle
+The following is adapted from these instructions for installing Ruby using RVM, tested on Ubuntu 20.04 LTS on Windows 10 WSL 1.0. Here we use Ruby 2.5, but if this doesn’t work try a newer version of Ruby.
+    1. \curl -sSL https://get.rvm.io | bash
+    2. rvm install 2.5
+    3. rvm use 2.5
+    4. gem install bundler
+## Download and setup the Global Calculator
+Run the following commands in Linux. To save time or if you have limited internet access, skip steps 6-8. This means you will not see images of possible future heat maps, but the server will run fine
+    1. git clone http://github.com/decc/global-calculator 
+    2. cd global-calculator 
+    3. bundle update
+    4. bundle 
+    5. cd model/global_2050_model 
+    6. bundle exec rake 
+    7. cd ../../public/gc-anim 
+    8. wget -nH --cut-dirs=1 --no-parent -r http://d2ow8032j7094s.cloudfront.net/20150123/index.html # This downloads 1.5 GB of images 
+    9. cd ../.. 
 
-Steps:
+## Starting the server
 
-1. git clone http://github.com/decc/global-calculator
-2. cd global-calculator
-3. bundle  
-4. cd model/global_2050_model
-5. bundle exec rake 
-6. cd ../../public/gc-anim
-7. wget -nH --cut-dirs=1 --no-parent -r http://d2ow8032j7094s.cloudfront.net/20150123/index.html # This downloads 1.5 GB of images 
-8. cd ../..
-7. rackup # This starts the server
-
+    10. Go to the main global-calculator directory and run the following command rackup. Some lines of code will appear, and eventually something along the lines of WEBrick Server started … Port 9292
+    11.  Open a web browser, like Firefox and go to http://localhost:9292 . You should see the homepage of the global calculator – all running on your own computer!
+## Notes
 The bundle step should install all the dependencies. If it fails it may ask you to check a particular 'gem' installs manually. Doing that normally fixes the problem and the step can be repeated.
-
 The bundle exec Rake step compiles the C version of the model. This can take tens of minutes, and requires plenty of memory.
-
-You should now be able to browse to http://127.0.0.1:9292 and see the local copy running.
 
 Altering the spreadsheet
 ------------------------
 
-If you change the spreadsheet, you need to re-translate it into its C equivalent. 
-
-To do this:
-
-1. change the spreadsheet in model/ 
-2. cd model
-3. bundle exec ruby translate_excel_into_c.rb
-
+1. Edit the spreadsheet in your spreadsheet software of choice
+2. Transfer the file to the server
+    1. Method 1 (preferred):
+        1. Upload the file to `model/2050Model.xlsx` on your GitHub repository. 
+        2. Go to your server and run ‘git pull origin master’
+    2. Method 2 (if using Windows 10 and WSL) :
+        1. Go to your server and type in `explorer.exe .` (including the dot after the space)
+        2. You should now see a File Explorer window with your Linux files (which are in a virtual network directory called “\\wsl$\”)
+        3. Copy and paste your spreadsheet to `model/2050Model.xlsx` in your Linux files
+    3. In Linux, make sure you have unzip installed. You can do this by running ‘sudo apt install unzip’
+    4. In your model folder on Linux, run `ruby translate_excel_into_c.rb`. This code (written by the great Tom Counsell) will compile your spreadsheet into c and ruby code that the webserver can use, and will take a long time, since it is a pretty complex spreadsheet. On a laptop with an i5 processor and 8 Gb RAM this took about 2 hours, but it could take less time, or more depending on your computer. You could get a server with some powerful processors, contribute to the excel_to_c code on GitHub to make it more efficient, run this overnight, or get a cup of tea to make this go more quickly.       
+    5. Once this finishes running. Navigate to the `global_2050_model directory` by running ‘cd global_2050_model’
+    6. Run ‘bundle exec rake’
+    7. Navigate to the main directory by doing ‘cd ../..’
+    8. Start the server to check it is working by running ‘rackup’
 Note:
 
 1. that the C version only includes outputs that are given in named ranges starting with 'webtool'
